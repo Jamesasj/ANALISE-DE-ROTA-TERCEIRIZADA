@@ -16,10 +16,8 @@ def executar(grafo, restricao, lotacao, pedidos):
         print(qtdIntemerdiarias)
         
         max_cliente = buscar_max_cliente(qtdIntemerdiarias, custos)
-        pedidos, lotacao = preecherCarro(origem, max_cliente, pedidos, lotacao,restricao, rota, custos)
+        pedidos, lotacao = preecherCarro(origem, max_cliente, pedidos, lotacao,restricao, rota, custos, qtdIntemerdiarias)
         
-        clientesSemProdutos = pedidos.avaliarClientesSemPodutos()
-        qtdIntemerdiarias = removerIntermediriosSemProdutos(clientesSemProdutos, qtdIntemerdiarias)
         lotacao.reiniciarCarros()
         n = n+1
     print('######################### Fim da Execução ###################################')
@@ -30,7 +28,7 @@ def removerIntermediriosSemProdutos(clientesSemProdutos, qtdIntemerdiarias):
             del qtdIntemerdiarias[cliente]
     return qtdIntemerdiarias
 
-def preecherCarro(origem, max_cliente, pedidos, lotacao, restricao, rota, custos):
+def preecherCarro(origem, max_cliente, pedidos, lotacao, restricao, rota, custos, qtdIntemerdiarias):
     print("\n############### Preenchendo os Carros ###################")
     cliente = max_cliente
     produtosCliente = pedidos.clientes[max_cliente]
@@ -46,6 +44,10 @@ def preecherCarro(origem, max_cliente, pedidos, lotacao, restricao, rota, custos
         if(clientesAtendidos):
             produtosCliente = removerClientes(produtosCliente, clientesAtendidos)
         
+        clientesSemProdutos = pedidos.avaliarClientesSemPodutos()
+        qtdIntemerdiarias = removerIntermediriosSemProdutos(clientesSemProdutos, qtdIntemerdiarias)
+        max_cliente = buscar_max_cliente(qtdIntemerdiarias, custos)
+
         carro, cliente, produtosCliente, pararExecusao = avaliarPróximoPasso(origem, cliente, lotacao, carro, max_cliente, produtosCliente, pedidos, rota)
     
         if(pararExecusao):
@@ -91,7 +93,6 @@ def buscar_max_cliente(lIntermediarios, lCusto):
             max_intemediario = no if lCusto[no] > lCusto[max_intemediario] else  max_intemediario
     return max_intemediario
 
-
 def avaliarPróximoPasso(origem, cliente, lotacao, carro, max_cliente, produtosCliente, pedidos, rota):
     pararExecucao = False
     if (lotacao.carroEstaCheio()):
@@ -112,6 +113,9 @@ def avaliarPróximoPasso(origem, cliente, lotacao, carro, max_cliente, produtosC
             produtosCliente = pedidos.clientes[cliente] 
 
     while not produtosCliente:
+        if cliente is None:
+            pararExecucao = True
+            break
         cliente = rota[cliente] #pega o proximo cliente da rota     
         if (cliente == origem):
             carro = lotacao.proximoCarro()
