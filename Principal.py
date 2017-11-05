@@ -1,5 +1,5 @@
 from GeradorRotas import executar 
-from realFactoy import criarDados
+from EntradaDados import criarDados
 from Restricao import Restricao
 from Lotacao import Lotacao
 from Pedidos import Pedidos

@@ -75,7 +75,6 @@ def gerarGrafo(g):
     g.add_cliente('21')
     g.add_cliente('18')
     g.add_cliente('17')
-
     g.add_aresta('14','20',2786)
     g.add_aresta('14','18',1949)
     g.add_aresta('20','14',1617)
@@ -84,14 +83,16 @@ def gerarGrafo(g):
     g.add_aresta('23','21',2540)
     g.add_aresta('16','17',1651)
     g.add_aresta('16','22',1256)
-    g.add_aresta('21','20',4504)
+
     g.add_aresta('21','23',2540)
     g.add_aresta('18','14',1964)
     g.add_aresta('17','16',1515)
     g.add_aresta('19','21',4338)
     g.add_aresta('21','19',4682)
-    g.add_aresta('15','17',3932)
+    g.add_aresta('17','15',4735)
     g.add_aresta('17','19',6868)
-    g.add_aresta('20','17',4944)
+
     g.add_aresta('20','21',2856)
+    g.add_aresta('17','20',6437)
+
     return g

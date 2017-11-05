@@ -3,13 +3,15 @@ from Dijkistra import grafo
 from Restricao import Restricao
 from Lotacao import Lotacao
 from Pedidos import Pedidos
-
+from GuardarResultados import DAO
 def executar(grafo, restricao, lotacao, pedidos):
     origem = '17'
     print('\n###################### Inicio da Execução ########################')
     custos, rota = dijsktra(grafo, origem)
     print('\n###################### Rotas calculadas ########################')
     print(rota)
+    print('\n###################### custos calculadas ########################')
+    print(custos)
 
     qtdIntemerdiarias = calcularNosIntermedirios(rota, origem)
     clientesSemProdutos = pedidos.avaliarClientesSemPodutos()
@@ -30,11 +32,27 @@ def executar(grafo, restricao, lotacao, pedidos):
     organizarResulta(lotacao)
 
 def organizarResulta(lotacao):
+    dao = DAO()
+    dao.abrirEntregas()
+    print('\n######################### Produtos entregues na rota ###################################')
     for dia, rotas in enumerate(lotacao.lDias):
         for carro in rotas:
             for lcliente in rotas[carro]:
                 for cliente in lcliente:
                     print("Dia: {}, Carro: {}, cliente: {}, produto: {} ".format(str(dia), carro, cliente, lcliente[cliente]))
+                    dao.guardar ([str(dia), carro, cliente, lcliente[cliente]])
+
+    dao.fecharArquivo()
+
+    dao.abrirRotas()
+    print('\n######################### Custos das entregas ###################################')
+    for dia, rotas in enumerate(lotacao.lCustosRota):
+        for carroCliente in rotas:
+            custo = rotas[carroCliente]
+            print("Dia : {} , Carro : {} ,Cliente : {}, Custo : {}".format(dia, carroCliente[0], carroCliente[1], custo))
+            dao.guardar([dia, carroCliente[0], carroCliente[1], custo])
+
+    dao.fecharArquivo()
 
 def removerIntermediriosSemProdutos(clientesSemProdutos, qtdIntemerdiarias):
     for cliente in clientesSemProdutos:
@@ -62,7 +80,7 @@ def preecherCarro(origem, max_cliente, pedidos, lotacao, restricao, rota, custos
         qtdIntemerdiarias = removerIntermediriosSemProdutos(clientesSemProdutos, qtdIntemerdiarias)
         max_cliente = buscar_max_cliente(qtdIntemerdiarias, custos)
 
-        carro, cliente, produtosCliente, pararExecusao = avaliarPróximoPasso(origem, cliente, lotacao, carro, max_cliente, produtosCliente, pedidos, rota)
+        carro, cliente, produtosCliente, pararExecusao = avaliarPróximoPasso(origem, cliente, lotacao, carro, max_cliente, produtosCliente, pedidos, rota, custos)
     
         if(pararExecusao):
             break
@@ -107,7 +125,7 @@ def buscar_max_cliente(lIntermediarios, lCusto):
             max_intemediario = no if lCusto[no] > lCusto[max_intemediario] else  max_intemediario
     return max_intemediario
 
-def avaliarPróximoPasso(origem, cliente, lotacao, carro, max_cliente, produtosCliente, pedidos, rota):
+def avaliarPróximoPasso(origem, cliente, lotacao, carro, max_cliente, produtosCliente, pedidos, rota, custos):
     pararExecucao = False
     if (lotacao.carroEstaCheio()):
         carro = lotacao.proximoCarro()
@@ -116,7 +134,8 @@ def avaliarPróximoPasso(origem, cliente, lotacao, carro, max_cliente, produtosC
         if carro is None: # A rota do dia já usou todos os carros. armazenar todas dos carro e reiniciar no proximo cliente com pedidos
             carro = lotacao.reiniciarCarros()
     else:
-        cliente = rota[cliente] #O carro não esta cheio e produtos não cabem então pega o prox cliente     
+        cliente = rota[cliente] #O carro não esta cheio e produtos não cabem então pega o prox cliente 
+        lotacao.adicionarCusto(cliente, custos[cliente])    
         if (cliente == origem):
             carro = lotacao.proximoCarro()
             cliente = max_cliente # reiniciar do primeiro cliente
@@ -131,6 +150,7 @@ def avaliarPróximoPasso(origem, cliente, lotacao, carro, max_cliente, produtosC
             pararExecucao = True
             break
         cliente = rota[cliente] #pega o proximo cliente da rota     
+        lotacao.adicionarCusto(cliente, custos[cliente])  
         if (cliente == origem):
             carro = lotacao.proximoCarro()
             if carro is None:

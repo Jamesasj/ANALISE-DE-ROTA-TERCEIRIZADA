@@ -7,6 +7,8 @@ class Lotacao():
         self.index = -1
         self.lProdutos = defaultdict(list)
         self.lRota = defaultdict(list)
+        self.lCustos = {}
+        self.lCustosRota = []
         self.lDias = []
     
     def add_carro(self, carro, max_lotacao):
@@ -39,6 +41,8 @@ class Lotacao():
 
     def colocarProdutoCarro(self, produto, cliente, custo):
         self.lRota[self.carro[0]].append({cliente:produto})
+        
+        self.lCustos[(self.carro[0], cliente)] = custo
 
         ocupacao = self.lotacao[(self.carro[0], produto)]
         capacidade = self.carro[1]
@@ -55,6 +59,11 @@ class Lotacao():
         for carro in self.carrosCopia:
             self.carros[carro] = self.carrosCopia[carro]
         self.lDias.append(self.lRota)
+        self.lCustosRota.append(self.lCustos)
+        self.lCustos = {}
         self.lRota = defaultdict(list)
         self.lProdutos = defaultdict(list)
+
+    def adicionarCusto(self, cliente, custo):
+        self.lCustos[(self.carro[0], cliente)] = custo
         
