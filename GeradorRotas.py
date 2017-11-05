@@ -5,10 +5,16 @@ from Lotacao import Lotacao
 from Pedidos import Pedidos
 
 def executar(grafo, restricao, lotacao, pedidos):
-    origem = '1'
+    origem = '17'
     print('\n###################### Inicio da Execução ########################')
     custos, rota = dijsktra(grafo, origem)
-    qtdIntemerdiarias = calcularNosIntermedirios(rota)
+    print('\n###################### Rotas calculadas ########################')
+    print(rota)
+
+    qtdIntemerdiarias = calcularNosIntermedirios(rota, origem)
+    clientesSemProdutos = pedidos.avaliarClientesSemPodutos()
+    qtdIntemerdiarias = removerIntermediriosSemProdutos(clientesSemProdutos, qtdIntemerdiarias)
+
     n = 1
     while qtdIntemerdiarias:
         print ('\n######################### Dia {} ######################'.format(n) )
@@ -21,6 +27,14 @@ def executar(grafo, restricao, lotacao, pedidos):
         lotacao.reiniciarCarros()
         n = n+1
     print('######################### Fim da Execução ###################################')
+    organizarResulta(lotacao)
+
+def organizarResulta(lotacao):
+    for dia, rotas in enumerate(lotacao.lDias):
+        for carro in rotas:
+            for lcliente in rotas[carro]:
+                for cliente in lcliente:
+                    print("Dia: {}, Carro: {}, cliente: {}, produto: {} ".format(str(dia), carro, cliente, lcliente[cliente]))
 
 def removerIntermediriosSemProdutos(clientesSemProdutos, qtdIntemerdiarias):
     for cliente in clientesSemProdutos:
@@ -39,7 +53,7 @@ def preecherCarro(origem, max_cliente, pedidos, lotacao, restricao, rota, custos
         
         print('Cliente : {}, PrdotosClinete : {}, carro : {}'.format(cliente, produtosCliente, carro))
         
-        clientesAtendidos, lotacao = incluirprodutos(cliente, lotacao, restricao, produtosCliente)
+        clientesAtendidos, lotacao = incluirprodutos(cliente, lotacao, restricao, produtosCliente, custos)
         
         if(clientesAtendidos):
             produtosCliente = removerClientes(produtosCliente, clientesAtendidos)
@@ -55,13 +69,13 @@ def preecherCarro(origem, max_cliente, pedidos, lotacao, restricao, rota, custos
     print(lotacao.lRota)
     return pedidos, lotacao
 
-def incluirprodutos(cliente, lotacao, restricao, produtosCliente):
+def incluirprodutos(cliente, lotacao, restricao, produtosCliente, custos):
     clientesAtendidos = []
     for indice, produto in enumerate(produtosCliente):
         if (not restricao.existeRestricao(produto, lotacao.pegarProdutos())):
             if(lotacao.existeLotacao(produto)):
                 if(lotacao.existeEspaco( produto)):
-                    lotacao.colocarProdutoCarro(produto, cliente)
+                    lotacao.colocarProdutoCarro(produto, cliente, custos[cliente])
                     clientesAtendidos.append(indice)
     return clientesAtendidos, lotacao
 
@@ -71,12 +85,12 @@ def removerClientes(produtosCliente, clientesAtendidos):
         del produtosCliente[indice]
     return produtosCliente
 
-def calcularNosIntermedirios(rota):
+def calcularNosIntermedirios(rota, origem):
     qtdIntemerdiarias = dict()
     for no in rota:
         proxNo = no
         count = 0
-        while proxNo != '1':
+        while proxNo != origem:
             count += 1
             proxNo = rota[proxNo]
         qtdIntemerdiarias[no] = count

@@ -21,9 +21,10 @@ Testes :
  - Feito        Montagem de rota do dia 2
  - Feito        Acabaram os produtos
  - Feito        Rotas fora do caminho com mais intemediario?
- - Não Feito    Decisão de terceirizar
  - Feito        Produtos fora da rota minima
+ - Não Feito    Decisão de terceirizar
  - Não feito    Calcular custo de terceirizar a cada iteração
+ - Não Feito    Formatar Resultados
 """
 def main():
     cenario1()
@@ -32,7 +33,7 @@ def cenario1():
     grafo = criarGrafo()
     restricao_p_p = criarRestricao1()
     lotacao_c_p = criarLotacoa1()
-    pedidos =criarPedidos1() 
+    pedidos = criarPedidos1() 
     print('###################### Restrições de Produto #########################')
     print(restricao_p_p.mProd_prod)
     print('\n###################### Locação do Veiculo #########################')

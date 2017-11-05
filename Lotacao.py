@@ -37,11 +37,13 @@ class Lotacao():
         capacidade = self.carro[1]
         return ocupacao <= capacidade
 
-    def colocarProdutoCarro(self, produto, cliente):
+    def colocarProdutoCarro(self, produto, cliente, custo):
         self.lRota[self.carro[0]].append({cliente:produto})
+
         ocupacao = self.lotacao[(self.carro[0], produto)]
         capacidade = self.carro[1]
         novaCapacidade = capacidade - ocupacao
+        
         self.carro = (self.carro[0], novaCapacidade)
         self.lProdutos[self.carro[0]].append(produto)
 
